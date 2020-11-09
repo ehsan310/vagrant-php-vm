@@ -5,6 +5,6 @@
 
 IP Addr : `192.168.1.103`
 
-**<ins>modify file Vagrantfile to change ip address if needed and then start it with `vagrant up`</ins>**
+**<ins>modify file Vagrantfile to change ip address if needed and then start it with</ins> `vagrant up`**
 
 
