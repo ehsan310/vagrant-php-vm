@@ -1,0 +1,85 @@
+---
+
+- name: "Executing ansible on local centos "
+  hosts: localhost
+  connection: local 
+  become: true
+  
+  handlers: 
+  - name: restart nginx
+    service: name=nginx state=restarted
+
+  - name: reload nginx
+    service: name=nginx state=reloaded
+
+  - name: restart apache
+    service: name=httpd state=restarted
+
+  - name: reload apache
+    service: name=httpd state=reloaded    
+
+  - name: restart haproxy
+    service: name=haproxy state=restarted
+
+  - name: reload haproxy
+    service: name=haproxy state=reloaded    
+
+
+  tasks:
+
+  - command: whoami
+    register: whoami
+  - debug:
+      var: whoami.stdout   
+
+  - name: Download and install epel-release
+    yum: name=epel-release state=present
+
+  - name: Download and install tools
+    yum:
+      name: ['httpd', 'php', 'php-fpm', 'nginx', 'haproxy']
+      state: present
+
+  - name: Disable SELinux
+    selinux: state=disabled         
+
+  - name: Copy a index.php file into "/var/www/html/"
+    copy:
+      src: files/index.php
+      dest: /var/www/html/index.php
+
+  - name: Configure the nginx conf file
+    template: src=nginx-config.conf.j2 dest=/etc/nginx/nginx.conf
+    notify: reload nginx    
+  
+  - name: Configure the apache conf file
+    template: src=apache-config.conf.j2 dest=/etc/httpd/conf/httpd.conf
+    notify: reload apache
+
+  - name: Configure the haproxy cnf file with hosts
+    template: src=haproxy.cfg.j2 dest=/etc/haproxy/haproxy.cfg
+    notify: reload haproxy
+
+  - name: php-fpm service state
+    service:
+      name: php-fpm
+      state: started
+      enabled: yes  
+
+  - name: httpd service state
+    service:
+      name: httpd
+      state: started
+      enabled: yes
+
+  - name: haproxy service state
+    service:
+      name: haproxy
+      state: started
+      enabled: yes
+
+  - name: nginx service state
+    service:
+      name: nginx
+      state: started
+      enabled: yes       
